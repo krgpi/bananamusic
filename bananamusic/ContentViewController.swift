@@ -18,7 +18,7 @@ class contentViewController: UIViewController, MPMediaPickerControllerDelegate {
     func chooseSongsButtonPressed() {
         let myMediaPickerVC = MPMediaPickerController(mediaTypes: MPMediaType.music)
         myMediaPickerVC.allowsPickingMultipleItems = true
-        myMediaPickerVC.popoverPresentationController?.sourceView = myMediaPickerVC.popoverPresentationController?.presentedView
+//        myMediaPickerVC.popoverPresentationController?.sourceView = myMediaPickerVC.popoverPresentationController?.presentedView
         myMediaPickerVC.delegate = self
         self.present(myMediaPickerVC, animated: true, completion: nil)
     }

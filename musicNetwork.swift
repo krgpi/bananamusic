@@ -38,32 +38,34 @@ class musicNetwork: Object {
             }
     }
     
-    func getNextItem(id: String)->[Data]{
+    func getNextItem(id: String)->Song{
         let selectItems = realmInstance.objects(songItem.self).filter("id = " + id)
-        var nextItemArray: [Data] = []
+        var nextItemArray: Song
         switch selectItems.count {
-            case 0: //該当なし→新規作成
+            case 0: //該当なし→Error
                 print("noItem")
-            case 1: //該当あり→加算
+            case 1: //該当あり→Get request to AppleMusicAPI, then map it's response to Song Object
                 let list = selectItems.first!.nextList
+                var songidList: [String] = []
                 for row in list{
-                    let id: String = row.key
-                    getSong(id, after: {
-                        json in
-                            print(json)
-                        nextItemArray.append(json as! Data)
-                        //Songオブジェクト的なものにマッピングして、そのオブジェクトの配列を返す
-                    })
+                    songidList.append(row.key)
                 }
+                var songidListstr: String = songidList.description
+                songidListstr = songidListstr.trimmingCharacters(in: NSCharacterSet(charactersIn: "[]") as CharacterSet)
+                getSong(songidListstr, after: {
+                    song in
+                        print(song)
+                    nextItemArray = song
+                })
+            
             default:
                 print("Err: musicNetwork.swift - func updateList() - case default")
             }
         
-        
         return nextItemArray
     }
     
-    func getSong(_ id: String, after:@escaping (Any)->()){
+    func getSong(_ id: String, after:@escaping (Song)->()){
         var components = URLComponents(string: "https://api.music.apple.com/v1/catalog/ja/songs?")
         components?.queryItems = [URLQueryItem(name: "ids", value: id)]
         let url = components?.url
@@ -73,8 +75,8 @@ class musicNetwork: Object {
                 print(response)
                 let decoder: JSONDecoder = JSONDecoder()
                 do{
-                    let json: Song = try decoder.decode(Song.self, from: data)
-                    after(json)
+                    let song: Song = try decoder.decode(Song.self, from: data)
+                    after(song)
                     
                 }catch{
                     print("Serivalize Error")
